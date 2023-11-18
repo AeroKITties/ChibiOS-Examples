@@ -1,0 +1,2 @@
+ALLCPPSRC += ${DEBUGLIB}/print_lib.cpp
+ALLINC += ${DEBUGLIB}
