@@ -1,0 +1,2 @@
+ALLCPPSRC += ${CPPEXAMPLELIB}/cpp_example.cpp
+ALLINC += ${CPPEXAMPLELIB}

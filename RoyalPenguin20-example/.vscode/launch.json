@@ -1,0 +1,34 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cortex-debug",
+            "request": "launch",
+            "name": "Debug (J-Link)",
+            "cwd": "${workspaceRoot}",
+            "executable": "./build/ch.elf",
+            "servertype": "jlink",
+            "device": "STM32F427VG",
+            "gdbTarget": "localhost:50000",
+            //"ipAddress": "25.36.227.249",
+            "interface": "swd",
+            "serialNumber": "",
+            "runToMain": true,
+            "swoConfig": {
+                "enabled": true,
+                "cpuFrequency": 168000000,
+                "swoFrequency": 2000000,
+                "source": "probe",
+                "decoders": [
+                    {
+                        "type": "console",
+                        "label": "ITM",
+                        "port": 0,
+                        "showOnStartup": true,
+                        "encoding": "ascii"
+                    }
+                ]
+            }
+        },
+    ]
+}
