@@ -10,13 +10,17 @@
 #include "modules/MPU9250Lib/acceldata.hpp"
 #include "modules/MPU9250Lib/gyrodata.hpp"
 
+#include "servo.hpp"
+
 #include "stdio.h"
 
-#define MPU9250_ADDRESS 0x68
-#define WHO_AM_I_RESP 0x73
-#define WHO_AM_I 0x75
-#define READ_FLAG 0x80
-#define READHEX 0x00
+ServoDriver sd;
+
+// #define MPU9250_ADDRESS 0x68
+// #define WHO_AM_I_RESP 0x73
+// #define WHO_AM_I 0x75
+// #define READ_FLAG 0x80
+// #define READHEX 0x00
 
 #define SPI_BaudRatePrescaler_2 ((uint16_t)0x0000)   //  42 MHz      21 MHZ
 #define SPI_BaudRatePrescaler_4 ((uint16_t)0x0008)   //  21 MHz      10.5 MHz
@@ -49,7 +53,11 @@ static THD_FUNCTION(Thread1, arg)
     float gy = gyroData.getAngularVelY();
     float gz = gyroData.getAngularVelZ();
 
-    chThdSleepMilliseconds(20);
+    // uint16_t servo_value = 1000 + (uint16_t)(500.0 * az);
+    uint16_t servo_value = sd.getServoMinValue(0) + (uint16_t)((float)((sd.getServoMaxValue(0) - sd.getServoMinValue(0)) / 2) * az);
+    sd.setServoValue(4, servo_value);
+
+    chThdSleepMilliseconds(2);
   }
 }
 
@@ -73,6 +81,8 @@ int main(void)
    * Activates the serial driver 2 using the driver default configuration.
    */
   sdStart(&SD2, NULL);
+
+  sd.config();
 
   /*
    * SPI configuration

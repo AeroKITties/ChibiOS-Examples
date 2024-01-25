@@ -96,6 +96,7 @@ DEPDIR   := ./.dep
 DEBUGLIB := ./modules/DebugLib
 CPPEXAMPLELIB := ./modules/CppExampleLib
 MPU9250LIB := ./modules/MPU9250Lib
+SERVOLIB := ./modules/ServoLib
 
 # Licensing files.
 include $(CHIBIOS)/os/license/license.mk
@@ -122,6 +123,8 @@ include $(DEBUGLIB)/debuglib.mk
 # Cpp example lib
 include $(CPPEXAMPLELIB)/cppexamplelib.mk
 include $(MPU9250LIB)/mpu9250.mk
+# Servo lib
+include $(SERVOLIB)/servo.mk
 
 # Define linker script file here
 LDSCRIPT= $(STARTUPLD)/STM32F407xG.ld

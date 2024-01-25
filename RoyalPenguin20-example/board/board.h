@@ -858,12 +858,12 @@
                          PIN_MODE_INPUT(GPIOE_PIN6) |   \
                          PIN_MODE_INPUT(GPIOE_PIN7) |   \
                          PIN_MODE_INPUT(GPIOE_PIN8) |   \
-                         PIN_MODE_INPUT(GPIOE_PIN9) |   \
+                         PIN_MODE_OUTPUT(GPIOE_PIN9) |  \
                          PIN_MODE_OUTPUT(GPIOE_PIN10) | \
-                         PIN_MODE_INPUT(GPIOE_PIN11) |  \
+                         PIN_MODE_OUTPUT(GPIOE_PIN11) | \
                          PIN_MODE_OUTPUT(GPIOE_PIN12) | \
-                         PIN_MODE_INPUT(GPIOE_PIN13) |  \
-                         PIN_MODE_INPUT(GPIOE_PIN14) |  \
+                         PIN_MODE_OUTPUT(GPIOE_PIN13) | \
+                         PIN_MODE_OUTPUT(GPIOE_PIN14) | \
                          PIN_MODE_OUTPUT(GPIOE_PIN15))
 #define VAL_GPIOE_OTYPER (PIN_OTYPE_PUSHPULL(GPIOE_PIN0) |  \
                           PIN_OTYPE_PUSHPULL(GPIOE_PIN1) |  \
