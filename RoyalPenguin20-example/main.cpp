@@ -5,6 +5,7 @@
 
 #include "modules/CppExampleLib/cpp_example.hpp"
 #include "modules/DebugLib/print_lib.hpp"
+#include "modules/MatrixLib/matrix.hpp"
 
 #include "modules/MPU9250Lib/mpu9250.hpp"
 #include "modules/MPU9250Lib/acceldata.hpp"
@@ -14,7 +15,12 @@
 
 #include "stdio.h"
 
+#include <stdlib.h>
+#include <string>
+#include <stdio.h>
+
 ServoDriver sd;
+
 
 // #define MPU9250_ADDRESS 0x68
 // #define WHO_AM_I_RESP 0x73
@@ -31,10 +37,33 @@ ServoDriver sd;
 #define SPI_BaudRatePrescaler_128 ((uint16_t)0x0030) //  656.25 KHz  328.125 KHz
 #define SPI_BaudRatePrescaler_256 ((uint16_t)0x0038) //  328.125 KHz 164.06 KHz
 
-static THD_WORKING_AREA(waThread1, 128);
+float kalman_filter(float& x_prev_k, float& P_prev_k, float zk){
+  float Fk = 1;
+  float Hk = 1;
+  float Rk = 0.003;
+  float Qk = Rk*5;
+  float xk, Pk, yk, Sk, Kk;
+
+  xk = Fk*x_prev_k;
+  Pk = Fk*P_prev_k*Fk + Qk;
+
+  yk = zk - Hk*xk;
+  Sk = Hk*Pk*Hk + Rk;
+  Kk = Pk*Hk*(1/Sk);
+  xk = xk + Kk*yk;
+  Pk = (1 - Kk*Hk)*Pk;
+
+  x_prev_k = xk;
+  P_prev_k = Pk;
+}
+
+static THD_WORKING_AREA(waThread1, 256);
 static THD_FUNCTION(Thread1, arg)
 {
   MPU9250 *mpu = (MPU9250 *)arg;
+
+  float Px_prev_k = 0, Py_prev_k = 0, Pz_prev_k = 0;
+  float ax = 0, ay = 0, az = 0;
   while (true)
   {
     // Accel data
@@ -45,16 +74,18 @@ static THD_FUNCTION(Thread1, arg)
     mpu->getGyroData(gyroData);
 
     // SWO Print
-    float ax = accelData.getAccelX();
-    float ay = accelData.getAccelY();
-    float az = accelData.getAccelZ();
+    kalman_filter(ax, Px_prev_k, accelData.getAccelX());
+    kalman_filter(ay, Py_prev_k, accelData.getAccelY());
+    kalman_filter(az, Pz_prev_k, accelData.getAccelZ());
 
     float gx = gyroData.getAngularVelX();
     float gy = gyroData.getAngularVelY();
     float gz = gyroData.getAngularVelZ();
 
+    printDouble(az);
+
     // uint16_t servo_value = 1000 + (uint16_t)(500.0 * az);
-    uint16_t servo_value = sd.getServoMinValue(0) + (uint16_t)((float)((sd.getServoMaxValue(0) - sd.getServoMinValue(0)) / 2) * az);
+    uint16_t servo_value = sd.getServoMinValue(0) + (uint16_t)((float)((sd.getServoMaxValue(0) - sd.getServoMinValue(0)) / 2) * ax);
     sd.setServoValue(4, servo_value);
 
     chThdSleepMilliseconds(2);

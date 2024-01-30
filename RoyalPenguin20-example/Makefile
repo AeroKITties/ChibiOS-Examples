@@ -15,7 +15,7 @@ endif
 
 # C++ specific options here (added to USE_OPT).
 ifeq ($(USE_CPPOPT),)
-  USE_CPPOPT = -std=gnu++11 -fno-exceptions -fno-rtti
+  USE_CPPOPT = -std=gnu++14 -fno-exceptions -fno-rtti
 endif
 
 # Enable this if you want the linker to remove unused code and data.
@@ -25,7 +25,7 @@ endif
 
 # Linker extra options here.
 ifeq ($(USE_LDOPT),)
-  USE_LDOPT = 
+  USE_LDOPT =  -lstdc++
 endif
 
 # Enable this if you want link time optimizations (LTO).
@@ -97,6 +97,7 @@ DEBUGLIB := ./modules/DebugLib
 CPPEXAMPLELIB := ./modules/CppExampleLib
 MPU9250LIB := ./modules/MPU9250Lib
 SERVOLIB := ./modules/ServoLib
+MATRIXLIB := ./modules/MatrixLib
 
 # Licensing files.
 include $(CHIBIOS)/os/license/license.mk
@@ -125,6 +126,8 @@ include $(CPPEXAMPLELIB)/cppexamplelib.mk
 include $(MPU9250LIB)/mpu9250.mk
 # Servo lib
 include $(SERVOLIB)/servo.mk
+# Matrix lib
+include $(MATRIXLIB)/matrixlib.mk
 
 # Define linker script file here
 LDSCRIPT= $(STARTUPLD)/STM32F407xG.ld
@@ -137,7 +140,7 @@ CSRC = $(ALLCSRC) \
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CPPSRC = $(ALLCPPSRC) \
-         main.cpp 
+         main.cpp
 
 # List ASM source files here.
 ASMSRC = $(ALLASMSRC)

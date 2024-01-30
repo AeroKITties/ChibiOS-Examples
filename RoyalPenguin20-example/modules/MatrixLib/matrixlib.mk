@@ -1,0 +1,3 @@
+ALLCPPSRC += ${MATRIXLIB}/matrix.cpp
+ALLINC += ${MATRIXLIB}
+ALLCPPSRC += ${MATRIXLIB}/permutation.cpp
