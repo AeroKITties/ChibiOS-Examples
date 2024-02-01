@@ -6,12 +6,13 @@
  */
 #include "mpu9250.hpp"
 
-MPU9250::MPU9250(SPIDriver* spiDriver, SPIConfig* spiConfig)
+MPU9250::MPU9250(SPIDriver *spiDriver, SPIConfig *spiConfig)
     : mspiDriver(spiDriver),
       mspiConfig(spiConfig),
       mInternalState(States::INITIALIZING),
       mAccelDivider(0),
-      mGyroDivider(0.) {
+      mGyroDivider(0.)
+{
   // Initialize the driver
   initialize();
 }
@@ -24,12 +25,14 @@ MPU9250::MPU9250(SPIDriver* spiDriver, SPIConfig* spiConfig)
  *   check to verify that the MPU9250 is properly connected and ready to
  * communicate.
  */
-void MPU9250::initialize() {
+void MPU9250::initialize()
+{
   // First check whether MPU9250 is properly connected.
   // It can be done by checking the WHO_AM_I register.
   const uint8_t returnVal = this->probeMPU9250();
   // Compare the result with the response that will be expected
-  if (returnVal == (uint8_t)MPU_REG::WHO_AM_I_RESP) {
+  if (returnVal == (uint8_t)MPU_REG::WHO_AM_I_RESP)
+  {
     mInternalState = States::INITIALIZED;
   }
   // Reset device
@@ -62,8 +65,9 @@ void MPU9250::initialize() {
  *
  * @param[in]
  */
-void MPU9250::readRegisters(const uint8_t& registerToRead, void* receiveBuffer,
-                            uint8_t nBytes) {
+void MPU9250::readRegisters(const uint8_t &registerToRead, void *receiveBuffer,
+                            uint8_t nBytes)
+{
   uint8_t txBuffer = registerToRead | (uint8_t)MPU_REG::READ_FLAG;
   // Select SPI device
   this->selectSpiDevice();
@@ -73,8 +77,9 @@ void MPU9250::readRegisters(const uint8_t& registerToRead, void* receiveBuffer,
   this->unSelectSpiDevice();
 }
 
-void MPU9250::writeRegister(const uint8_t& registerToWrite,
-                            const uint8_t& dataToWrite, const uint8_t& nBytes) {
+void MPU9250::writeRegister(const uint8_t &registerToWrite,
+                            const uint8_t &dataToWrite, const uint8_t &nBytes)
+{
   // Transfer buffer
   uint8_t txBuffer[2];
   txBuffer[0] = registerToWrite;
@@ -90,7 +95,8 @@ void MPU9250::writeRegister(const uint8_t& registerToWrite,
 /*
  * @brief Selects the SPI device to start the transmission
  */
-void MPU9250::selectSpiDevice() {
+void MPU9250::selectSpiDevice()
+{
   // Acquire SPI bus
   spiAcquireBus(mspiDriver);
 
@@ -104,7 +110,8 @@ void MPU9250::selectSpiDevice() {
 /*
  * Un-selects and release the SPI device
  */
-void MPU9250::unSelectSpiDevice() {
+void MPU9250::unSelectSpiDevice()
+{
   // Unselect the slave
   spiUnselect(mspiDriver);
 
@@ -115,40 +122,43 @@ void MPU9250::unSelectSpiDevice() {
 /*
  * @brief Set the dividers for Accelerometer and Gyroscope
  */
-void MPU9250::updateGyroAccelDividers() {
+void MPU9250::updateGyroAccelDividers()
+{
   // Set the Gyro and Accel dividers based on the data set in the device
   uint8_t gyroDivider;
   readRegisters((uint8_t)MPU_REG::CONFIG_GYRO, &gyroDivider, 1);
-  switch (gyroDivider) {
-    case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_250DPS:
-      mGyroDivider = 131;
-      break;
-    case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_500DPS:
-      mGyroDivider = 65.5;
-      break;
-    case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_1000DPS:
-      mGyroDivider = 32.8;
-      break;
-    case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_2000DPS:
-      mGyroDivider = 16.4;
-      break;
+  switch (gyroDivider)
+  {
+  case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_250DPS:
+    mGyroDivider = 131;
+    break;
+  case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_500DPS:
+    mGyroDivider = 65.5;
+    break;
+  case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_1000DPS:
+    mGyroDivider = 32.8;
+    break;
+  case (uint8_t)MPU_GYRO_CFG::GYRO_FS_SEL_2000DPS:
+    mGyroDivider = 16.4;
+    break;
   }
   // Set Accel divider
   uint8_t accelDivider;
   readRegisters((uint8_t)MPU_REG::CONFIG_ACCEL, &accelDivider, 1);
-  switch (accelDivider) {
-    case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_2G:
-      mAccelDivider = 16384;
-      break;
-    case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_4G:
-      mAccelDivider = 8192;
-      break;
-    case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_8G:
-      mAccelDivider = 4096;
-      break;
-    case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_10G:
-      mAccelDivider = 2048;
-      break;
+  switch (accelDivider)
+  {
+  case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_2G:
+    mAccelDivider = 16384;
+    break;
+  case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_4G:
+    mAccelDivider = 8192;
+    break;
+  case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_8G:
+    mAccelDivider = 4096;
+    break;
+  case (uint8_t)MPU_ACCEL_CFG::ACCEL_FS_SEL_10G:
+    mAccelDivider = 2048;
+    break;
   }
 }
 
@@ -157,20 +167,22 @@ void MPU9250::updateGyroAccelDividers() {
  *
  * @ return Returns the received value from MPU9250.
  */
-uint8_t MPU9250::probeMPU9250() {
+uint8_t MPU9250::probeMPU9250()
+{
   uint8_t receiveBuffer[2];
   readRegisters((uint8_t)MPU_REG::WHO_AM_I, &receiveBuffer, 2);
   return receiveBuffer[1];
 }
 
-const MPU9250::States& MPU9250::getState() const { return mInternalState; }
+const MPU9250::States &MPU9250::getState() const { return mInternalState; }
 
 /*
  * @brief Get Gyrodata from MPU9250
  *
  * @param[in/out] gyroData The Gyroscope data
  */
-void MPU9250::getGyroData(GyroData& gyroData) {
+void MPU9250::getGyroData(GyroData &gyroData)
+{
   // The receive buffer should of length 6 because of two bytes for
   // each axis
   uint8_t gyroReceiveBuffer[6];
@@ -198,7 +210,8 @@ void MPU9250::getGyroData(GyroData& gyroData) {
  *
  * @param[in/out] accelData The Accelerometer data
  */
-void MPU9250::getAccelData(AccelData& accelData) {
+void MPU9250::getAccelData(AccelData &accelData)
+{
   // The receive buffer should be of length 6
   uint8_t accelReceiveBuffer[6];
   readRegisters((uint8_t)MPU_REG::ACCEL_XOUT_H,

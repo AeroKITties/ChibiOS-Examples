@@ -11,6 +11,8 @@
 #include "modules/MPU9250Lib/acceldata.hpp"
 #include "modules/MPU9250Lib/gyrodata.hpp"
 
+#include "modules/MS5611Lib/ms5611.hpp"
+
 #include "servo.hpp"
 
 #include "stdio.h"
@@ -18,9 +20,9 @@
 #include <stdlib.h>
 #include <string>
 #include <stdio.h>
+#include <string>
 
 ServoDriver sd;
-
 
 // #define MPU9250_ADDRESS 0x68
 // #define WHO_AM_I_RESP 0x73
@@ -37,21 +39,22 @@ ServoDriver sd;
 #define SPI_BaudRatePrescaler_128 ((uint16_t)0x0030) //  656.25 KHz  328.125 KHz
 #define SPI_BaudRatePrescaler_256 ((uint16_t)0x0038) //  328.125 KHz 164.06 KHz
 
-float kalman_filter(float& x_prev_k, float& P_prev_k, float zk){
+float kalman_filter(float &x_prev_k, float &P_prev_k, float zk)
+{
   float Fk = 1;
   float Hk = 1;
   float Rk = 0.003;
-  float Qk = Rk*5;
+  float Qk = Rk * 5;
   float xk, Pk, yk, Sk, Kk;
 
-  xk = Fk*x_prev_k;
-  Pk = Fk*P_prev_k*Fk + Qk;
+  xk = Fk * x_prev_k;
+  Pk = Fk * P_prev_k * Fk + Qk;
 
-  yk = zk - Hk*xk;
-  Sk = Hk*Pk*Hk + Rk;
-  Kk = Pk*Hk*(1/Sk);
-  xk = xk + Kk*yk;
-  Pk = (1 - Kk*Hk)*Pk;
+  yk = zk - Hk * xk;
+  Sk = Hk * Pk * Hk + Rk;
+  Kk = Pk * Hk * (1 / Sk);
+  xk = xk + Kk * yk;
+  Pk = (1 - Kk * Hk) * Pk;
 
   x_prev_k = xk;
   P_prev_k = Pk;
@@ -88,7 +91,7 @@ static THD_FUNCTION(Thread1, arg)
     uint16_t servo_value = sd.getServoMinValue(0) + (uint16_t)((float)((sd.getServoMaxValue(0) - sd.getServoMinValue(0)) / 2) * ax);
     sd.setServoValue(4, servo_value);
 
-    chThdSleepMilliseconds(2);
+    chThdSleepMilliseconds(50);
   }
 }
 
@@ -118,7 +121,8 @@ int main(void)
   /*
    * SPI configuration
    */
-  SPIConfig spiConfig = {false, false, NULL, NULL, GPIOA, 4, SPI_BaudRatePrescaler_8, 0};
+  SPIConfig spiConfig_imu = {false, false, NULL, NULL, GPIOA, 4, SPI_BaudRatePrescaler_16, 0};
+  SPIConfig spiConfig_baro = {false, false, NULL, NULL, GPIOA, 2, SPI_BaudRatePrescaler_16, 0};
 
   /*
    * SPI1 I/O pins setup.
@@ -131,8 +135,17 @@ int main(void)
   palSetPad(GPIOA, 4);
   palSetPad(GPIOA, 2);
 
+  MS5611 ms5611(&SPID1, &spiConfig_baro);
+
   // MPU9250 class initialization
-  MPU9250 mpu9250(&SPID1, &spiConfig);
+  MPU9250 mpu9250(&SPID1, &spiConfig_imu);
+  while (true)
+  {
+    ms5611.calculate();
+    std::string s = "t=" + std::to_string(ms5611.temperature / 100.0) + "    p=" + std::to_string(2 * ms5611.pressure) + "\n";
+    printString(s.c_str());
+    chThdSleepMilliseconds(100);
+  }
 
   /*
    * Creates new thread

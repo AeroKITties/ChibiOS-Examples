@@ -98,6 +98,7 @@ CPPEXAMPLELIB := ./modules/CppExampleLib
 MPU9250LIB := ./modules/MPU9250Lib
 SERVOLIB := ./modules/ServoLib
 MATRIXLIB := ./modules/MatrixLib
+MS5611LIB := ./modules/MS5611Lib
 
 # Licensing files.
 include $(CHIBIOS)/os/license/license.mk
@@ -128,6 +129,8 @@ include $(MPU9250LIB)/mpu9250.mk
 include $(SERVOLIB)/servo.mk
 # Matrix lib
 include $(MATRIXLIB)/matrixlib.mk
+# Barometer ms5611
+include $(MS5611LIB)/ms5611.mk
 
 # Define linker script file here
 LDSCRIPT= $(STARTUPLD)/STM32F407xG.ld
